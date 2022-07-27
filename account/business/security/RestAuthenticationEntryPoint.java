@@ -10,6 +10,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 
 @Component
 public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
@@ -22,8 +23,9 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request, HttpServletResponse response
             , AuthenticationException authException) throws IOException {
 
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
+//        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
 
-//        resolver.resolveException(request, response, null, authException);
+        resolver.resolveException(request, response, null, authException);
     }
+
 }

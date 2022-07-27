@@ -22,6 +22,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     RestAuthenticationEntryPoint restAuthenticationEntryPoint;
 
+    @Autowired
+    CustomAccessDeniedHandler customAccessDeniedHandler;
+
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth
@@ -32,18 +35,23 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.httpBasic()
-                .and().exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint) // Handle auth errors
+                // Handle auth errors
+                .and().exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint)
+                // Handle 403 errors
+                .accessDeniedHandler(customAccessDeniedHandler)
                 .and()
                 .csrf().disable().headers().frameOptions().disable() // For Postman, the H2 console
                 .and()
                 .authorizeRequests() // Manage access
                 .mvcMatchers("/api/auth/signup").permitAll()
                 .mvcMatchers("/actuator/shutdown").permitAll()
+                .mvcMatchers("/api/acct/payments").hasRole("ACCOUNTANT")
+                .mvcMatchers("/api/auth/changepass").hasAnyRole("ADMINISTRATOR", "USER", "ACCOUNTANT")
+                .mvcMatchers("/api/empl/payment").hasAnyRole("USER", "ACCOUNTANT")
+                .mvcMatchers("/api/acct/payments").hasRole("ACCOUNTANT")
+                .mvcMatchers("/api/admin/**").hasRole("ADMINISTRATOR")
                 .mvcMatchers("/**").authenticated()
-//                .mvcMatchers("/api/auth/changepass").authenticated()
-//                .mvcMatchers("/api/empl/payment").hasAnyRole("USER", "ACCOUNTANT")
-//                .mvcMatchers("/api/acct/**").hasRole("ACCOUNTANT")
-//                .mvcMatchers("/api/admin/**").hasRole("ADMIN")
+
                 // other matchers
                 .and()
                 .sessionManagement()
@@ -52,6 +60,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public PasswordEncoder getEncoder() {
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder(13);
     }
+
+
 }
