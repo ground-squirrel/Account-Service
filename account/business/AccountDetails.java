@@ -22,6 +22,8 @@ public class AccountDetails implements UserDetails {
 
     private final List<GrantedAuthority> rolesAndAuthorities;
 
+    private boolean locked;
+
     public AccountDetails(Account account) {
         this.id = account.getId();
         this.name = account.getName();
@@ -32,6 +34,7 @@ public class AccountDetails implements UserDetails {
                 .map(Group::getName)
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
+        this.locked = account.isLocked();
     }
 
     @Override
@@ -56,7 +59,7 @@ public class AccountDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return !this.locked;
     }
 
     @Override

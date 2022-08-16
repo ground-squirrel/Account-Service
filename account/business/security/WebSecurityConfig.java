@@ -35,8 +35,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.httpBasic()
+                .authenticationEntryPoint(restAuthenticationEntryPoint)
                 // Handle auth errors
-                .and().exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint)
+                .and().exceptionHandling()
                 // Handle 403 errors
                 .accessDeniedHandler(customAccessDeniedHandler)
                 .and()
@@ -50,10 +51,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .mvcMatchers("/api/empl/payment").hasAnyRole("USER", "ACCOUNTANT")
                 .mvcMatchers("/api/acct/payments").hasRole("ACCOUNTANT")
                 .mvcMatchers("/api/admin/**").hasRole("ADMINISTRATOR")
+                .mvcMatchers("/api/security/events").hasRole("AUDITOR")
                 .mvcMatchers("/**").authenticated()
-
-                // other matchers
                 .and()
+                // other matchers
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS); // no session
     }

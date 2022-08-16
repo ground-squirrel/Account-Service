@@ -48,6 +48,8 @@ public class Account {
             ))
     private Set<Group> accountGroups = new TreeSet<>();
 
+    private boolean locked;
+
     public String getEmail() {
         return email.toLowerCase();
     }

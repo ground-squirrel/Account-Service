@@ -1,6 +1,6 @@
 package account.business;
 
-public enum ROLE_OPERATIONS {
+public enum RoleOperations {
     GRANT,
     REMOVE
 }

@@ -34,7 +34,7 @@ public class ControllerExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.UNAUTHORIZED.value(),
                 "Unauthorized",
-                "",
+                e.getMessage(),
                 request.getRequestURI());
 
         return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);

@@ -19,7 +19,7 @@ public class AccountService {
     }
 
     public Account findByEmail(String email) {
-        return repository.findByEmail(email);
+        return repository.findByEmail(email.toLowerCase());
     }
 
     public void deleteAccount(Account account) {

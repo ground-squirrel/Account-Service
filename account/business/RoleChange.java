@@ -7,7 +7,7 @@ public class RoleChange {
 
     private String user;
     private String role;
-    private ROLE_OPERATIONS operation;
+    private RoleOperations operation;
 
     public String getUser() {
         return this.user.toLowerCase();

@@ -2,9 +2,13 @@ package account.presentation;
 
 import account.business.Account;
 import account.business.AccountWrapper;
+import account.business.security.EventName;
+import account.business.security.SecurityEvent;
+import account.business.security.SecurityEventService;
 import account.business.security.UserAlreadyExistsException;
 import account.persistence.AccountRepository;
 import account.persistence.GroupRepository;
+import net.bytebuddy.implementation.bind.MethodDelegationBinder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +38,9 @@ public class AuthenticationController {
 
     @Autowired
     PasswordEncoder encoder;
+
+    @Autowired
+    SecurityEventService securityEventService;
 
     private static List<String> breachedPasswords = List.of("PasswordForJanuary"
             , "PasswordForFebruary", "PasswordForMarch", "PasswordForApril"
@@ -58,7 +66,15 @@ public class AuthenticationController {
         }
 
         if (null == accountRepository.findByEmail(account.getEmail())) {
-            return new AccountWrapper(accountRepository.addAccount(account));
+            Account accountAdded = accountRepository.addAccount(account);
+            SecurityEvent event = new SecurityEvent(
+                    LocalDateTime.now(),
+                    EventName.CREATE_USER,
+                    "Anonymous",
+                    accountAdded.getEmail(),
+                    "/api/auth/signup");
+            securityEventService.saveEvent(event);
+            return new AccountWrapper(accountAdded);
         } else {
             throw new UserAlreadyExistsException();
         }
@@ -90,6 +106,13 @@ public class AuthenticationController {
         //all ok
         account.setPassword(encoder.encode(input.get("new_password")));
         accountRepository.save(account);
+        SecurityEvent event = new SecurityEvent(
+                LocalDateTime.now(),
+                EventName.CHANGE_PASSWORD,
+                account.getEmail(),
+                account.getEmail(),
+                "/api/auth/changepass");
+        securityEventService.saveEvent(event);
 
         return Map.of("email", account.getEmail()
                 , "status", "The password has been updated successfully");
